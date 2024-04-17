@@ -14,60 +14,138 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model Post {
-    id        Int      @id @default(autoincrement())
-    name      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    createdBy   User   @relation(fields: [createdById], references: [id])
-    createdById String
-
-    @@index([name])
-}
-
 // Necessary for Next auth
 model Account {
-    id                String  @id @default(cuid())
-    userId            String
-    type              String
-    provider          String
-    providerAccountId String
-    refresh_token     String? @db.Text
-    access_token      String? // @db.Text
-    expires_at        Int?
-    token_type        String?
-    scope             String?
-    id_token          String? // @db.Text
-    session_state     String?
-    user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+    id                String   @id @default(cuid()) @map("id")
+    userId            String   @map("user_id")
+    type              String   @map("type")
+    provider          String   @map("provider")
+    providerAccountId String   @map("provider_account_id")
+    refresh_token     String?  @db.Text @map("refresh_token")
+    access_token      String?  @db.Text @map("access_token")
+    expires_at        Int?     @map("expires_at")
+    token_type        String?  @map("token_type")
+    scope             String?  @map("scope")
+    id_token          String?  @db.Text @map("id_token")
+    session_state     String?  @map("session_state")
+    user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    @@unique([provider, providerAccountId])
+    @@unique([provider, providerAccountId], name: "unique_provider_account")
+    @@map("accounts")
 }
 
 model Session {
-    id           String   @id @default(cuid())
-    sessionToken String   @unique
-    userId       String
-    expires      DateTime
+    id           String   @id @default(cuid()) @map("id")
+    sessionToken String   @unique @map("session_token")
+    userId       String   @map("user_id")
+    expires      DateTime @map("expires")
     user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@map("sessions")
+    @@index([userId], name: "idx_user_id")
 }
 
 model User {
-    id            String    @id @default(cuid())
-    name          String?
-    email         String?   @unique
-    emailVerified DateTime?
-    image         String?
+    id            String         @id @default(cuid()) @map("id")
+    firstName     String         @map("first_name")
+    lastName      String         @map("last_name")
+    email         String         @unique @map("email")
+    emailVerified DateTime?      @map("email_verified")
+    image         String?        @map("image")
+    role          Role           @default(USER) @map("role")
     accounts      Account[]
+    consultations Consultation[]
     sessions      Session[]
-    posts         Post[]
+
+    @@map("users")
+    @@index([email], name: "idx_email")
 }
 
 model VerificationToken {
-    identifier String
-    token      String   @unique
-    expires    DateTime
+    identifier String   @map("identifier")
+    token      String   @unique @map("token")
+    expires    DateTime @map("expires")
 
-    @@unique([identifier, token])
+    @@unique([identifier, token], name: "unique_identifier_token")
+    @@map("verification_tokens")
+}
+
+enum Role {
+    USER
+    ADMIN
+}
+
+model Category {
+    id            Int            @id @default(autoincrement()) @map("id")
+    text          String         @map("text")
+    consultations Consultation[]
+    createdAt     DateTime       @default(now()) @map("created_at")
+    updatedAt     DateTime       @updatedAt @map("updated_at")
+
+    @@map("categories")
+}
+
+model Consultation {
+    id         Int        @id @default(autoincrement()) @map("id")
+    userId     String     @map("user_id")
+    user       User       @relation(fields: [userId], references: [id])
+    categoryId Int        @map("category_id")
+    category   Category   @relation(fields: [categoryId], references: [id])
+    isActive   Boolean    @default(true) @map("is_active")
+    prevStep   Int        @default(1) @map("prev_step")
+    nextStep   Int        @default(1) @map("next_step")
+    questions  Question[]
+    report     Report? 
+    createdAt  DateTime   @default(now()) @map("created_at")
+
+    @@map("consultations")           // Index for 'order' field
+    @@index([userId, categoryId, isActive], name: "idx_user_category_active")
+}
+
+model Preliminary {
+    id             Int          @id @default(autoincrement()) @map("id")
+    text           String       @db.VarChar(255) @map("text")
+    order          Int?         @map("order")
+    options        Option[]
+    createdAt      DateTime     @default(now()) @map("created_at")
+
+    @@map("preliminaries")
+    @@index([order], name: "idx_order")
+}
+
+model Question {
+    id             Int          @id @default(autoincrement()) @map("id")
+    text           String       @db.VarChar(255) @map("text")
+    isPreliminary  Boolean?     @map("is_preliminary")
+    order          Int?         @map("order")
+    step          Int?         @map("step")
+    consultationId Int          @map("consultation_id")
+    consultation   Consultation @relation(fields: [consultationId], references: [id])
+    response       String?      @db.VarChar(255) @map("response")
+    createdAt      DateTime     @default(now()) @map("created_at")
+
+    @@map("questions")
+    @@index([consultationId], name: "idx_consultation_id")
+    @@index([isPreliminary, order], name: "idx_preliminary_order")
+}
+
+model Option {
+    id         Int      @id @default(autoincrement()) @map("id")
+    text       String   @map("text")
+    type       Int      @default(1) @map("type")
+    preliminaryId Int      @map("preliminary_id")
+    preliminary   Preliminary @relation(fields: [preliminaryId], references: [id])
+    createdAt  DateTime @default(now()) @map("created_at")
+
+    @@map("options")
+}
+
+model Report {
+    id             Int          @id @default(autoincrement()) @map("id")
+    consultationId Int          @unique @map("consultation_id")
+    consultation   Consultation @relation(fields: [consultationId], references: [id])
+    path           String       @map("path")
+    createdAt      DateTime     @default(now()) @map("created_at")
+
+    @@map("reports")
 }
