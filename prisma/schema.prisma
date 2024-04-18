@@ -16,19 +16,19 @@ datasource db {
 
 // Necessary for Next auth
 model Account {
-    id                String   @id @default(cuid()) @map("id")
-    userId            String   @map("user_id")
-    type              String   @map("type")
-    provider          String   @map("provider")
-    providerAccountId String   @map("provider_account_id")
-    refresh_token     String?  @db.Text @map("refresh_token")
-    access_token      String?  @db.Text @map("access_token")
-    expires_at        Int?     @map("expires_at")
-    token_type        String?  @map("token_type")
-    scope             String?  @map("scope")
-    id_token          String?  @db.Text @map("id_token")
-    session_state     String?  @map("session_state")
-    user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    id                String  @id @default(cuid()) @map("id")
+    userId            String  @map("user_id")
+    type              String  @map("type")
+    provider          String  @map("provider")
+    providerAccountId String  @map("provider_account_id")
+    refresh_token     String? @map("refresh_token") @db.Text
+    access_token      String? @map("access_token") @db.Text
+    expires_at        Int?    @map("expires_at")
+    token_type        String? @map("token_type")
+    scope             String? @map("scope")
+    id_token          String? @map("id_token") @db.Text
+    session_state     String? @map("session_state")
+    user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     @@unique([provider, providerAccountId], name: "unique_provider_account")
     @@map("accounts")
@@ -41,8 +41,8 @@ model Session {
     expires      DateTime @map("expires")
     user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    @@map("sessions")
     @@index([userId], name: "idx_user_id")
+    @@map("sessions")
 }
 
 model User {
@@ -51,14 +51,15 @@ model User {
     lastName      String         @map("last_name")
     email         String         @unique @map("email")
     emailVerified DateTime?      @map("email_verified")
+    password      String         @map("password")
     image         String?        @map("image")
     role          Role           @default(USER) @map("role")
     accounts      Account[]
     consultations Consultation[]
     sessions      Session[]
 
-    @@map("users")
     @@index([email], name: "idx_email")
+    @@map("users")
 }
 
 model VerificationToken {
@@ -95,47 +96,47 @@ model Consultation {
     prevStep   Int        @default(1) @map("prev_step")
     nextStep   Int        @default(1) @map("next_step")
     questions  Question[]
-    report     Report? 
+    report     Report?
     createdAt  DateTime   @default(now()) @map("created_at")
 
-    @@map("consultations")           // Index for 'order' field
     @@index([userId, categoryId, isActive], name: "idx_user_category_active")
+    @@map("consultations")
 }
 
 model Preliminary {
-    id             Int          @id @default(autoincrement()) @map("id")
-    text           String       @db.VarChar(255) @map("text")
-    order          Int?         @map("order")
-    options        Option[]
-    createdAt      DateTime     @default(now()) @map("created_at")
+    id        Int      @id @default(autoincrement()) @map("id")
+    text      String   @map("text") @db.VarChar(255)
+    order     Int?     @map("order")
+    options   Option[]
+    createdAt DateTime @default(now()) @map("created_at")
 
-    @@map("preliminaries")
     @@index([order], name: "idx_order")
+    @@map("preliminaries")
 }
 
 model Question {
     id             Int          @id @default(autoincrement()) @map("id")
-    text           String       @db.VarChar(255) @map("text")
+    text           String       @map("text") @db.VarChar(255)
     isPreliminary  Boolean?     @map("is_preliminary")
     order          Int?         @map("order")
-    step          Int?         @map("step")
+    step           Int?         @map("step")
     consultationId Int          @map("consultation_id")
     consultation   Consultation @relation(fields: [consultationId], references: [id])
-    response       String?      @db.VarChar(255) @map("response")
+    response       String?      @map("response") @db.VarChar(255)
     createdAt      DateTime     @default(now()) @map("created_at")
 
-    @@map("questions")
     @@index([consultationId], name: "idx_consultation_id")
     @@index([isPreliminary, order], name: "idx_preliminary_order")
+    @@map("questions")
 }
 
 model Option {
-    id         Int      @id @default(autoincrement()) @map("id")
-    text       String   @map("text")
-    type       Int      @default(1) @map("type")
-    preliminaryId Int      @map("preliminary_id")
+    id            Int         @id @default(autoincrement()) @map("id")
+    text          String      @map("text")
+    type          Int         @default(1) @map("type")
+    preliminaryId Int         @map("preliminary_id")
     preliminary   Preliminary @relation(fields: [preliminaryId], references: [id])
-    createdAt  DateTime @default(now()) @map("created_at")
+    createdAt     DateTime    @default(now()) @map("created_at")
 
     @@map("options")
 }

@@ -5,7 +5,9 @@ import {
   type NextAuthOptions,
 } from "next-auth";
 import { type Adapter } from "next-auth/adapters";
-import DiscordProvider from "next-auth/providers/discord";
+import CredentialsProvider from "next-auth/providers/credentials";
+import bcrypt from 'bcryptjs';
+import { Prisma } from "@prisma/client";
 
 import { env } from "~/env";
 import { db } from "~/server/db";
@@ -20,8 +22,11 @@ declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
-      // ...other properties
-      // role: UserRole;
+      firstName: string;
+      lastName: string;
+      email: string;
+      password: string;
+      role?: "USER" | "ADMIN";
     } & DefaultSession["user"];
   }
 
@@ -48,10 +53,27 @@ export const authOptions: NextAuthOptions = {
   },
   adapter: PrismaAdapter(db) as Adapter,
   providers: [
-    DiscordProvider({
-      clientId: env.DISCORD_CLIENT_ID,
-      clientSecret: env.DISCORD_CLIENT_SECRET,
-    }),
+    CredentialsProvider({
+      name: 'Credentials',
+      credentials: {
+        email: { label: "email", type: "text" },
+        password: { label: "Password", type: "password" }
+      },
+      async authorize(credentials, req) {
+        console.log("hello");
+        // const user = await prisma.user.findUnique({
+        //   where: { email: credentials.email },
+        // });
+
+        // if (user && bcrypt.compareSync(credentials.password, user.password)) {
+        //   return user;
+        // } else {
+        //   throw new Error('Invalid email or password');
+        // }
+
+        return null;
+      }
+    })
     /**
      * ...add more providers here.
      *
