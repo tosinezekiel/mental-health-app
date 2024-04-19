@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import Questionaire from './questionaire';
-import { Button, Input } from '@nextui-org/react';
+import { Button } from '@nextui-org/react';
+import { useQuestionResponseContext } from '../context/question-context';
 
 interface Question {
     questionId: string;
@@ -11,12 +12,16 @@ interface Question {
 
 interface QuestionWrapper {
     questionaire : Question[];
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    nextButtonHandler : () => void;
 }
 
 
-const QuestionContainer : React.FC<QuestionWrapper> = ( {questionaire} ) => {
+const QuestionContainer : React.FC<QuestionWrapper> = ( {questionaire, nextButtonHandler} ) => {
 
     const [responses, setResponses] = useState<Record<string, string | string[]>>({});
+
+    const {data , updateQuestionaire} = useQuestionResponseContext()
 
     const handleResponseChange = (questionId: string, response: string | string[]) => {
         setResponses(prevResponses => ({
@@ -27,8 +32,17 @@ const QuestionContainer : React.FC<QuestionWrapper> = ( {questionaire} ) => {
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        console.log('Responses:', responses);
-        // Handle form submission here, such as sending responses to a server or updating state
+
+        const responseArray = Object.entries(responses).map(([questionId, answer]) => {
+            return { 
+                questionId: questionId,
+                answers: answer
+             };
+          });
+        const currentStep = data.currentStep + 1;
+
+        updateQuestionaire( {currentStep: currentStep, questions: questionaire, responses: responseArray} );
+        nextButtonHandler();
     };
 
 
