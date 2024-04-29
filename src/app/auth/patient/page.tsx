@@ -8,7 +8,6 @@ import { PlusIcon } from "@heroicons/react/20/solid";
 const PatientDashboard = () => {
 // const { data: session } = useSession();
 const session = getSession();
-  console.log(session);
   return (
     <div className="text-center">
       <svg

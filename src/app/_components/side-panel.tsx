@@ -31,7 +31,6 @@ const SidePanel = () => {
     const [selectedStep, setSelectedStep] = useState<CardDetail | null>(null);
 
     const handleItemClick = (cardDetail: CardDetail) => {
-        console.log(cardDetail);
         setSelectedStep(cardDetail);
       };
 

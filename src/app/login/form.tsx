@@ -49,7 +49,6 @@ const Login = () => {
       }
 
       const session = await getSession();
-      console.log(session);
       
     } catch (err) {
       if (err instanceof Error) {

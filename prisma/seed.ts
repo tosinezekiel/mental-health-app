@@ -23,8 +23,6 @@ async function main() {
       },
     });
   }
-
-  console.log(`Created ${users.length} sample users.`);
 }
 
 main()

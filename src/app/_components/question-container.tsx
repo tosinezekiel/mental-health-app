@@ -27,7 +27,7 @@ const QuestionContainer : React.FC<QuestionWrapper> = ( {questionaire} ) => {
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        console.log('Responses:', responses);
+        
         // Handle form submission here, such as sending responses to a server or updating state
     };
 

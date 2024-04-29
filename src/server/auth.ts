@@ -87,11 +87,9 @@ export const authOptions: NextAuthOptions = {
           if (user && bcrypt.compareSync(credentials.password, user.password)) {
             return { id: user.id, firstName: user.firstName, lastName: user.lastName, role: user.role, email: user.email };
           } else {
-            console.error("Invalid email or password");
             throw new Error('Invalid email or password');
           }
         } catch (error) {
-          console.error("Error in authorization:", error);
           throw error;
         }
       }

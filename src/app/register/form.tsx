@@ -39,7 +39,6 @@ const Form = () => {
 
       setValidationErrors(newErrors);
       setIsLoading(false);
-      console.log(error);
       return;
     }
 
@@ -63,8 +62,7 @@ const Form = () => {
       if (!response.ok) {
         throw new Error(data.message);
       }
-
-      console.log("User created successfully", data);
+      
       const authenticate = await signIn("credentials", {
         redirect: false,
         email,

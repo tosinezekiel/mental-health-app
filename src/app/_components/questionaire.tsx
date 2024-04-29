@@ -21,7 +21,7 @@ const Questionaire : React.FC<QuestionWrapper> = ({ questionContent, onChange, v
   const {questionId, question , answerType, options} = questionContent;
 
   const handleChange = (selectedOption: string | string[]) => {
-    console.log('Value Change :', selectedOption)
+    
     onChange(questionId, selectedOption);
   }
 
