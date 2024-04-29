@@ -3,6 +3,7 @@
 import { Fragment, useState } from "react";
 import { Dialog, Menu, Transition } from "@headlessui/react";
 import { useSession } from "next-auth/react";
+import { signOut } from "next-auth/react"
 import {
   Bars3Icon,
   ChartPieIcon,
@@ -29,6 +30,8 @@ const adminMenu = [
 function classNames(...classes: (string | undefined | null | boolean)[]) {
   return classes.filter(Boolean).join(" ");
 }
+
+const logout = async () => await signOut({redirect: true, callbackUrl: '/login'});
 
 export default function DashboardLayout({
     children,
@@ -96,11 +99,6 @@ export default function DashboardLayout({
                   <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-indigo-600 px-6 pb-4">
                     <div className="flex h-16 shrink-0 items-center">
                         MHES
-                      {/* <img
-                        className="h-8 w-auto"
-                        src="https://tailwindui.com/img/logos/mark.svg?color=white"
-                        alt="Your Company"
-                      /> */}
                     </div>
                     <nav className="flex flex-1 flex-col">
                       <ul role="list" className="flex flex-1 flex-col gap-y-7">
@@ -133,8 +131,8 @@ export default function DashboardLayout({
                           </ul>
                         </li>
                         <li className="mt-auto">
-                          <a
-                            href="/logout"
+                          <button
+                            onClick={ logout }
                             className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-indigo-200 hover:bg-indigo-700 hover:text-white"
                           >
                             <Cog6ToothIcon
@@ -142,7 +140,7 @@ export default function DashboardLayout({
                               aria-hidden="true"
                             />
                             Logout
-                          </a>
+                          </button>
                         </li>
                       </ul>
                     </nav>
@@ -195,8 +193,8 @@ export default function DashboardLayout({
                   </ul>
                 </li>
                 <li className="mt-auto">
-                  <a
-                    href="/logout"
+                  <button
+                    onClick={ logout }
                     className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-indigo-200 hover:bg-indigo-700 hover:text-white"
                   >
                     <Cog6ToothIcon
@@ -204,7 +202,7 @@ export default function DashboardLayout({
                       aria-hidden="true"
                     />
                     Logout
-                  </a>
+                  </button>
                 </li>
               </ul>
             </nav>
