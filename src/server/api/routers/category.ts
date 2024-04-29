@@ -2,15 +2,14 @@ import { z } from "zod";
 
 import {
   createTRPCRouter,
-  protectedProcedure,
+  publicProcedure,
 } from "~/server/api/trpc";
 
 export const categoryRouter = createTRPCRouter({
-  all: protectedProcedure
-    .input(z.object({ text: z.string() }))
-    .query(({ input }) => {
+  all: publicProcedure
+    .query(() => {
       return {
-        greeting: ``,
+        greeting: `hello world!`,
       };
     }),
 });

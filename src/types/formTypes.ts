@@ -6,6 +6,10 @@ export interface IRegisterFormValues {
     retypePassword: string;
 }
 
+export interface FormErrors {
+    [key: string]: string;
+}
+
 
 export interface ILoginFormValues {
     email: string;
