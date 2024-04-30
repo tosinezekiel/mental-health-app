@@ -12,6 +12,7 @@ import { Prisma } from "@prisma/client";
 
 import { env } from "~/env";
 import { db } from "~/server/db";
+import { findUserByID } from "./utils/user";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -43,12 +44,18 @@ declare module "next-auth" {
  */
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    session: async ({ session, user }) => ({
-      ...session,
-      user: {
-        ...session.user,
-      },
-    }),
+    async session({ session, token }) {
+      
+      if (typeof token.sub === 'string') {
+        const userDetails = await findUserByID(token.sub);
+        session.user = {
+          ...session.user,
+          ...userDetails
+        };
+      }
+      
+      return session;
+    },
     async jwt({ token, user }) {
       if (user) {
         return { ...token, ...user };

@@ -1,44 +1,86 @@
-"use client"
+"use client";
 
-import { Fragment, useState } from "react";
+import { Fragment, useState, useMemo } from "react";
 import { Dialog, Menu, Transition } from "@headlessui/react";
 import { useSession } from "next-auth/react";
-import { signOut } from "next-auth/react"
+import { signOut } from "next-auth/react";
+import { usePathname } from "next/navigation";
+
 import {
   Bars3Icon,
   ChartPieIcon,
   Cog6ToothIcon,
   HomeIcon,
   XMarkIcon,
+  ClockIcon,
 } from "@heroicons/react/24/outline";
+
 import {
   ChevronDownIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/20/solid";
 
-const userMenu = [
-  { name: "Dashboard", href: "/dashboard/user", icon: HomeIcon, current: true },
-  { name: "Reports", href: "/report", icon: ChartPieIcon, current: false },
-];
-
-const adminMenu = [
-  { name: "Dashboard", href: "/dashboard/admin", icon: HomeIcon, current: true },
-  { name: "users", href: "/report", icon: ChartPieIcon, current: false },
-];
-
-
 function classNames(...classes: (string | undefined | null | boolean)[]) {
   return classes.filter(Boolean).join(" ");
 }
 
-const logout = async () => await signOut({redirect: true, callbackUrl: '/login'});
-
 export default function DashboardLayout({
-    children,
-  }: {
-    children: React.ReactNode
-  }) {
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const logout = async () =>
+    await signOut({ redirect: true, callbackUrl: "/login" });
+
+  const { data: session } = useSession();
+
+  const user = useMemo(() => session?.user, [session]);
+
+  const path: string = usePathname();
+
+  const userMenu = [
+    {
+      name: "Dashboard",
+      href: "/auth/patient",
+      icon: HomeIcon,
+      current: path === "/auth/patient",
+    },
+    {
+      name: "Reports",
+      href: "/auth/patient/report",
+      icon: ChartPieIcon,
+      current: path === "/auth/patient/report",
+    },
+    {
+      name: "history",
+      href: "/auth/patient/history",
+      icon: ClockIcon,
+      current: path === "/auth/patient/history",
+    },
+  ];
+
+  const adminMenu = [
+    {
+      name: "Dashboard",
+      href: "/auth/admin",
+      icon: HomeIcon,
+      current: path === "/auth/admin",
+    },
+    {
+      name: "Users",
+      href: "/auth/admin/patients",
+      icon: ChartPieIcon,
+      current: path === "/auth/admin/patients",
+    },
+    {
+      name: "Practices",
+      href: "/auth/admin/practices",
+      icon: ChartPieIcon,
+      current: path === "/auth/admin/practices",
+    },
+  ];
 
   return (
     <>
@@ -96,54 +138,111 @@ export default function DashboardLayout({
                     </div>
                   </Transition.Child>
                   {/* Sidebar component, swap this element with another sidebar if you like */}
-                  <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-indigo-600 px-6 pb-4">
-                    <div className="flex h-16 shrink-0 items-center">
-                        MHES
-                    </div>
-                    <nav className="flex flex-1 flex-col">
-                      <ul role="list" className="flex flex-1 flex-col gap-y-7">
-                        <li>
-                          <ul role="list" className="-mx-2 space-y-1">
-                            {userMenu.map((item) => (
-                              <li key={item.name}>
-                                <a
-                                  href={item.href}
-                                  className={classNames(
-                                    item.current
-                                      ? "bg-indigo-700 text-white"
-                                      : "text-indigo-200 hover:bg-indigo-700 hover:text-white",
-                                    "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6",
-                                  )}
-                                >
-                                  <item.icon
+                  <div
+                    className={classNames(
+                      user?.role === "ADMIN"
+                        ? "flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 px-6 pb-4 ring-1 ring-white/10"
+                        : "flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6 pb-4",
+                    )}
+                  >
+                    <div className="flex h-16 shrink-0 items-center">MHES</div>
+
+                    {/* User menu */}
+                    {user?.role == "USER" && (
+                      <nav className="flex flex-1 flex-col">
+                        <ul
+                          role="list"
+                          className="flex flex-1 flex-col gap-y-7"
+                        >
+                          <li>
+                            <ul role="list" className="-mx-2 space-y-1">
+                              {userMenu.map((item) => (
+                                <li key={item.name}>
+                                  <a
+                                    href={item.href}
                                     className={classNames(
                                       item.current
-                                        ? "text-white"
-                                        : "text-indigo-200 group-hover:text-white",
-                                      "h-6 w-6 shrink-0",
+                                        ? "bg-gray-50 text-blue-600"
+                                        : "text-gray-700 hover:bg-gray-50 hover:text-blue-600",
+                                      "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6",
                                     )}
-                                    aria-hidden="true"
-                                  />
-                                  {item.name}
-                                </a>
-                              </li>
-                            ))}
-                          </ul>
-                        </li>
-                        <li className="mt-auto">
-                          <button
-                            onClick={ logout }
-                            className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-indigo-200 hover:bg-indigo-700 hover:text-white"
-                          >
-                            <Cog6ToothIcon
-                              className="h-6 w-6 shrink-0 text-indigo-200 group-hover:text-white"
-                              aria-hidden="true"
-                            />
-                            Logout
-                          </button>
-                        </li>
-                      </ul>
-                    </nav>
+                                  >
+                                    <item.icon
+                                      className={classNames(
+                                        item.current
+                                          ? "text-blue-600"
+                                          : "text-gray-400 group-hover:text-blue-600",
+                                        "h-6 w-6 shrink-0",
+                                      )}
+                                      aria-hidden="true"
+                                    />
+                                    {item.name}
+                                  </a>
+                                </li>
+                              ))}
+                            </ul>
+                          </li>
+                          <li className="mt-auto">
+                            <button
+                              onClick={logout}
+                              className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-blue-200 hover:bg-blue-700 hover:text-white"
+                            >
+                              <Cog6ToothIcon
+                                className="h-6 w-6 shrink-0 text-gray-400 group-hover:text-blue-600"
+                                aria-hidden="true"
+                              />
+                              Logout
+                            </button>
+                          </li>
+                        </ul>
+                      </nav>
+                    )}
+
+                    {/* Admin menu */}
+                    {user?.role == "ADMIN" && (
+                      <nav className="flex flex-1 flex-col">
+                        <ul
+                          role="list"
+                          className="flex flex-1 flex-col gap-y-7"
+                        >
+                          <li>
+                            <ul role="list" className="-mx-2 space-y-1">
+                              {adminMenu.map((item) => (
+                                <li key={item.name}>
+                                  <a
+                                    href={item.href}
+                                    className={classNames(
+                                      item.current
+                                        ? "bg-gray-50 text-blue-600"
+                                        : "text-gray-700 hover:bg-gray-50 hover:text-blue-600",
+                                      "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6",
+                                    )}
+                                  >
+                                    <item.icon
+                                      className="h-6 w-6 shrink-0"
+                                      aria-hidden="true"
+                                    />
+                                    {item.name}
+                                  </a>
+                                </li>
+                              ))}
+                            </ul>
+                          </li>
+                          <li className="mt-auto">
+                            <button
+                              onClick={logout}
+                              className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-blue-200 hover:bg-blue-700 hover:text-white"
+                            >
+                              <Cog6ToothIcon
+                                className="h-6 w-6 shrink-0 text-blue-200 group-hover:text-white"
+                                aria-hidden="true"
+                              />
+                              Logout
+                            </button>
+                          </li>
+                        </ul>
+                      </nav>
+                    )}
                   </div>
                 </Dialog.Panel>
               </Transition.Child>
@@ -154,58 +253,106 @@ export default function DashboardLayout({
         {/* Static sidebar for desktop */}
         <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
           {/* Sidebar component, swap this element with another sidebar if you like */}
-          <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-indigo-600 px-6 pb-4">
-            <div className="flex h-16 shrink-0 items-center">
-              <img
-                className="h-8 w-auto"
-                src="https://tailwindui.com/img/logos/mark.svg?color=white"
-                alt="Your Company"
-              />
+          <div
+            className={classNames(
+              user?.role === "ADMIN"
+                ? "flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 px-6 pb-4"
+                : "flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6 pb-4",
+            )}
+          >
+            <div className="flex h-16 shrink-0 items-center font-bold">
+              MHES
             </div>
-            <nav className="flex flex-1 flex-col">
-              <ul role="list" className="flex flex-1 flex-col gap-y-7">
-                <li>
-                  <ul role="list" className="-mx-2 space-y-1">
-                    {userMenu.map((item) => (
-                      <li key={item.name}>
-                        <a
-                          href={item.href}
-                          className={classNames(
-                            item.current
-                              ? "bg-indigo-700 text-white"
-                              : "text-indigo-200 hover:bg-indigo-700 hover:text-white",
-                            "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6",
-                          )}
-                        >
-                          <item.icon
+            {/* Desktop patient menu */}
+            {user?.role == "USER" && (
+              <nav className="flex flex-1 flex-col">
+                <ul role="list" className="flex flex-1 flex-col gap-y-7">
+                  <li>
+                    <ul role="list" className="-mx-2 space-y-1">
+                      {userMenu.map((item) => (
+                        <li key={item.name}>
+                          <a
+                            href={item.href}
                             className={classNames(
                               item.current
-                                ? "text-white"
-                                : "text-indigo-200 group-hover:text-white",
-                              "h-6 w-6 shrink-0",
+                                ? "bg-gray-50 text-blue-600"
+                                : "text-gray-700 hover:bg-gray-50 hover:text-blue-600",
+                              "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6",
                             )}
-                            aria-hidden="true"
-                          />
-                          {item.name}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </li>
-                <li className="mt-auto">
-                  <button
-                    onClick={ logout }
-                    className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-indigo-200 hover:bg-indigo-700 hover:text-white"
-                  >
-                    <Cog6ToothIcon
-                      className="h-6 w-6 shrink-0 text-indigo-200 group-hover:text-white"
-                      aria-hidden="true"
-                    />
-                    Logout
-                  </button>
-                </li>
-              </ul>
-            </nav>
+                          >
+                            <item.icon
+                              className={classNames(
+                                item.current
+                                  ? "text-blue-600"
+                                  : "text-gray-400 group-hover:text-blue-600",
+                                "h-6 w-6 shrink-0",
+                              )}
+                              aria-hidden="true"
+                            />
+                            {item.name}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
+                  <li className="mt-auto">
+                    <button
+                      onClick={logout}
+                      className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-blue-200 hover:bg-blue-700 hover:text-white"
+                    >
+                      <Cog6ToothIcon
+                        className="h-6 w-6 shrink-0 text-gray-400 group-hover:text-blue-600"
+                        aria-hidden="true"
+                      />
+                      Logout
+                    </button>
+                  </li>
+                </ul>
+              </nav>
+            )}
+
+            {/* Desktop admin menu */}
+            {user?.role == "ADMIN" && (
+              <nav className="flex flex-1 flex-col">
+                <ul role="list" className="flex flex-1 flex-col gap-y-7">
+                  <li>
+                    <ul role="list" className="-mx-2 space-y-1">
+                      {adminMenu.map((item) => (
+                        <li key={item.name}>
+                          <a
+                            href={item.href}
+                            className={classNames(
+                              item.current
+                                ? "bg-gray-800 text-white"
+                                : "text-gray-400 hover:bg-gray-800 hover:text-white",
+                              "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6",
+                            )}
+                          >
+                            <item.icon
+                              className="h-6 w-6 shrink-0"
+                              aria-hidden="true"
+                            />
+                            {item.name}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
+                  <li className="mt-auto">
+                    <button
+                      onClick={logout}
+                      className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-blue-200 hover:bg-blue-700 hover:text-white"
+                    >
+                      <Cog6ToothIcon
+                        className="h-6 w-6 shrink-0 text-blue-200 group-hover:text-white"
+                        aria-hidden="true"
+                      />
+                      Logout
+                    </button>
+                  </li>
+                </ul>
+              </nav>
+            )}
           </div>
         </div>
 
@@ -226,23 +373,7 @@ export default function DashboardLayout({
               aria-hidden="true"
             />
 
-            <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
-              <form className="relative flex flex-1" action="#" method="GET">
-                <label htmlFor="search-field" className="sr-only">
-                  Search
-                </label>
-                <MagnifyingGlassIcon
-                  className="pointer-events-none absolute inset-y-0 left-0 h-full w-5 text-gray-400"
-                  aria-hidden="true"
-                />
-                <input
-                  id="search-field"
-                  className="block h-full w-full border-0 py-0 pl-8 pr-0 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm"
-                  placeholder="Search..."
-                  type="search"
-                  name="search"
-                />
-              </form>
+            <div className="flex flex-1 justify-end gap-x-4 self-stretch lg:gap-x-6">
               <div className="flex items-center gap-x-4 lg:gap-x-6">
                 {/* Separator */}
                 <div
@@ -256,10 +387,10 @@ export default function DashboardLayout({
                     <span className="sr-only">Open user menu</span>
                     <span className="hidden lg:flex lg:items-center">
                       <span
-                        className="ml-4 text-sm font-semibold leading-6 text-gray-900"
+                        className="ml-4 text-sm font-semibold capitalize leading-6 text-gray-900"
                         aria-hidden="true"
                       >
-                        Tom Cook
+                        { `${user?.firstName} ${user?.lastName}` }
                       </span>
                       <ChevronDownIcon
                         className="ml-2 h-5 w-5 text-gray-400"

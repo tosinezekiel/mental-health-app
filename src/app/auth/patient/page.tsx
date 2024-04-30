@@ -1,13 +1,10 @@
 "use client";
 import Link from "next/link";
 import { getServerAuthSession } from "~/server/auth";
-import { signIn, useSession, getSession } from "next-auth/react";
 import { api } from "~/trpc/server";
 import { PlusIcon } from "@heroicons/react/20/solid";
 
 const PatientDashboard = () => {
-// const { data: session } = useSession();
-const session = getSession();
   return (
     <div className="text-center">
       <svg

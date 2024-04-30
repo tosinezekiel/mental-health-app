@@ -1,79 +1,71 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
 import { Input, Button } from "@nextui-org/react";
 import { registerFormSchema } from "../schemas/formSchema";
-import { FormErrors } from "~/types/formTypes";
+import { useForm } from "../hooks/useForm";
+import { useFormValidation } from "../hooks/useFormValidation";
+import { IRegisterFormValues } from "~/types/formTypes";
+import { useRouter } from "next/navigation";
+import { api } from "~/trpc/react";
+
 
 const Form = () => {
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [retypePassword, setRetypePassword] = useState<string>("");
-  const [firstName, setFirstName] = useState<string>("");
-  const [lastName, setLastName] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
-  const [validationErrors, setValidationErrors] = useState<FormErrors>({});
+  const router = useRouter();
+  const { data: session } = useSession();
+  const userCreator = api.user.create.useMutation()
+
+  const { formData, handleChange } = useForm<IRegisterFormValues>({
+    email: "",
+    password: "",
+    firstName: "",
+    lastName: "",
+    retypePassword: "",
+  }, (name) => {
+    clearValidationError(name);
+  });
+
+  const { validationErrors, validate, clearValidationErrors, clearValidationError } =
+    useFormValidation<IRegisterFormValues>(registerFormSchema);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError("");
-    setValidationErrors({});
+    clearValidationErrors();
     setIsLoading(true);
 
-    const formData = { email, password, retypePassword, firstName, lastName };
-    const validation = registerFormSchema.safeParse(formData);
-
-    if (!validation.success) {
-      const newErrors: FormErrors = {};
-      validation.error.issues.forEach((issue) => {
-        const key = issue.path[0];
-        if (typeof key === "string") {
-          newErrors[key] = issue.message;
-        } else {
-          console.error("Unexpected issue path:", issue.path);
-        }
-      });
-
-      setValidationErrors(newErrors);
+    if (!validate(formData)) {
       setIsLoading(false);
       return;
     }
 
     try {
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      userCreator.mutate(formData, {
+        onSuccess: async (createdUser) => {
+          const { email, password } = formData;
+          const authenticate = await signIn("credentials", {
+            redirect: false,
+            email,
+            password,
+          });
+
+          if (authenticate?.error) {
+            throw new Error(authenticate.error);
+          }
+
+          session?.user.role == "ADMIN"
+            ? router.push("/auth/admin")
+            : router.push("/auth/patient");
         },
-        body: JSON.stringify({
-          firstName,
-          lastName,
-          email,
-          password,
-          retypePassword,
-        }),
+        onError: (error) => {
+          throw new Error(`Error creating user: ${error.message}`);
+        },
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message);
-      }
-      
-      const authenticate = await signIn("credentials", {
-        redirect: false,
-        email,
-        password,
-      });
-
-      if (authenticate?.error) {
-        throw new Error(authenticate.error);
-      } else {
-        // Redirect to main dashboard
-      }
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
@@ -85,7 +77,7 @@ const Form = () => {
 
   return (
     <>
-      <div className="mt-20 flex w-1/2 flex-col items-end justify-center">
+      <div className="mt-20 flex w-1/2 flex-col items-end justify-center px-10">
         <h2 className="text-3xl font-semibold text-blue-600 ">Register</h2>
         <h2 className="text-xl font-semibold text-gray-700">
           Let's set you up quickly <span className="icon-placeholder">😃</span>
@@ -94,13 +86,13 @@ const Form = () => {
           Sign up to begin your evaluation journey.
         </p>
       </div>
-      <div className="mt-20 w-1/2 items-center p-10">
+      <div className="mt-20 w-1/2 flex-1 items-center py-20">
         {validationErrors.length && (
           <div className="border-l-4 border-red-400 bg-red-50 p-4">
             <div className="ml-3">
               {Object.entries(validationErrors).map(([field, message]) => (
                 <p className="text-xs text-red-700" key={field}>
-                  {message}
+                  {error}
                 </p>
               ))}
             </div>
@@ -108,57 +100,100 @@ const Form = () => {
         )}
         <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
           <Input
-            size="sm"
+            size="md"
             type="text"
             label="First name"
+            name="firstName"
             placeholder="John"
-            value={firstName}
+            value={formData.firstName}
             variant="underlined"
-            onChange={(e) => setFirstName(e.target.value)}
+            isInvalid={
+              validationErrors.hasOwnProperty("firstName") ? true : false
+            }
+            errorMessage={
+              validationErrors.hasOwnProperty("firstName") &&
+              validationErrors.firstName.message
+            }
+            onChange={handleChange}
+            className="no-border"
           />
           <Input
-            size="sm"
+            size="md"
             type="text"
+            name="lastName"
             label="Last name"
             placeholder="Doe"
-            value={lastName}
+            value={formData.lastName}
             variant="underlined"
-            onChange={(e) => setLastName(e.target.value)}
+            isInvalid={
+              validationErrors.hasOwnProperty("lastName") ? true : false
+            }
+            errorMessage={
+              validationErrors.hasOwnProperty("lastName") &&
+              validationErrors.lastName.message
+            }
+            onChange={handleChange}
+            className="no-border"
           />
           <Input
-            size="sm"
+            size="md"
             type="email"
             label="Email"
             placeholder="Enter your email"
-            value={email}
             variant="underlined"
-            onChange={(e) => setEmail(e.target.value)}
+            value={formData.email}
+            name="email"
+            isInvalid={validationErrors.hasOwnProperty("email") ? true : false}
+            errorMessage={
+              validationErrors.hasOwnProperty("email") &&
+              validationErrors.email.message
+            }
+            onChange={handleChange}
+            className="no-border"
           />
           <Input
-            size="sm"
+            size="md"
             type="password"
             label="Password"
             variant="underlined"
+            value={formData.password}
+            name="password"
             placeholder="Enter your password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            isInvalid={
+              validationErrors.hasOwnProperty("password") ? true : false
+            }
+            errorMessage={
+              validationErrors.hasOwnProperty("password") &&
+              validationErrors.password.message
+            }
+            onChange={handleChange}
+            className="no-border"
           />
           <Input
-            size="sm"
+            size="md"
             type="password"
+            name="retypePassword"
             label="Retype Password"
             placeholder="Retype your password"
             variant="underlined"
-            value={retypePassword}
-            onChange={(e) => setRetypePassword(e.target.value)}
+            value={formData.retypePassword}
+            isInvalid={
+              validationErrors.hasOwnProperty("retypePassword") ? true : false
+            }
+            errorMessage={
+              validationErrors.hasOwnProperty("retypePassword") &&
+              validationErrors.retypePassword.message
+            }
+            onChange={handleChange}
+            className="no-border"
           />
           {isLoading && (
-            <Button color="primary" isLoading size="sm">
+            <Button color="primary" isLoading size="md" radius="sm">
               Loading
             </Button>
           )}
           {!isLoading && (
-            <Button color="primary" size="sm" type="submit" radius="none">
+            <Button color="primary" size="md" type="submit" radius="sm">
               Submit
             </Button>
           )}

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { signIn, useSession, getSession } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { Input, Button } from "@nextui-org/react";
 import { loginFormSchema } from "../schemas/formSchema";
 import { ILoginFormValues } from "~/types/formTypes";
@@ -16,13 +16,15 @@ const Login = () => {
   const router = useRouter();
   const { data: session } = useSession();
 
-  const { formData, handleChange } = useForm<ILoginFormValues>({
-    email: "",
-    password: "",
-  });
-
-  const { validationErrors, validate, clearValidationErrors } =
+  const { validationErrors, validate, clearValidationErrors, clearValidationError } =
     useFormValidation<ILoginFormValues>(loginFormSchema);
+
+    const { formData, handleChange } = useForm<ILoginFormValues>({
+      email: "",
+      password: "",
+    }, (name) => {
+      clearValidationError(name);
+    });
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -40,15 +42,14 @@ const Login = () => {
       const result = await signIn("credentials", {
         redirect: false,
         email,
-        password,
-        // callbackUrl: 'http://localhost:3000/auth/patient' 
+        password
       });
 
       if (result?.error) {
         throw new Error(result.error);
       }
 
-      const session = await getSession();
+      session?.user.role == "ADMIN" ? router.push('/auth/admin') : router.push('/auth/patient');
       
     } catch (err) {
       if (err instanceof Error) {
@@ -59,23 +60,16 @@ const Login = () => {
     }
   };
 
-  useEffect(() => {
-    if (session) {
-      const url: string = (session.user.role === 'ADMIN') ? '/auth/admin' : '/auth/patient';
-      router.push(url);
-    }
-  }, [session, router]);
-
   return (
     <>
-      <div className="mt-20 flex w-1/2 flex-col items-end justify-center">
+      <div className="mt-20 flex w-1/2 flex-col items-end justify-center px-10">
         <h2 className="text-3xl font-semibold text-blue-600 ">Login</h2>
         <h2 className="text-xl font-semibold text-gray-700">
           Welcome back <i className="icon-placeholder">👋</i>
         </h2>
         <p className="text-xs text-gray-500">We are glad to have you back!</p>
       </div>
-      <div className="mt-20 w-1/2 items-center p-10">
+      <div className="mt-20 w-1/2 items-center py-20 flex-1">
         {error && (
           <div className="border-l-4 border-red-400 bg-red-50 p-4">
             <div className="ml-3">
@@ -85,7 +79,7 @@ const Login = () => {
         )}
         <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
           <Input
-            size="sm"
+            size="md"
             type="email"
             label="Email"
             placeholder="Enter your email"
@@ -98,9 +92,10 @@ const Login = () => {
               validationErrors.email.message
             }
             onChange={handleChange}
+            className="no-border"
           />
           <Input
-            size="sm"
+            size="md"
             type="password"
             label="Password"
             variant="underlined"
@@ -115,14 +110,15 @@ const Login = () => {
               validationErrors.password.message
             }
             onChange={handleChange}
+            className="no-border"
           />
           {isLoading && (
-            <Button color="primary" isLoading size="sm" radius="none">
+            <Button color="primary" isLoading size="md" radius="sm">
               Loading
             </Button>
           )}
           {!isLoading && (
-            <Button color="primary" size="sm" type="submit" radius="none">
+            <Button color="primary" size="md" type="submit" radius="sm">
               Submit
             </Button>
           )}

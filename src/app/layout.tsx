@@ -33,10 +33,10 @@ export default function RootLayout({
             <div className="flex min-h-screen flex-col">
               <NextUIProvider>
                 <main className="">
-                  <TRPCReactProvider>{children}</TRPCReactProvider>
+                  <TRPCReactProvider>{ children }</TRPCReactProvider>
                 </main>
               </NextUIProvider>
-              <footer className="absolute bottom-10 left-auto top-auto w-full px-6 py-4 text-center">
+              <footer className="absolute bottom-10 left-auto right-auto w-full px-6 py-4 text-center">
                 Made with ❤️
               </footer>
             </div>

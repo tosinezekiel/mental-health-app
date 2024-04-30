@@ -11,4 +11,4 @@ export default withAuth(
     },
   )
 
-export const config = { matcher: ["/auth/patient"] }
+export const config = { matcher: ["/auth/patient", "/auth/admin"] }

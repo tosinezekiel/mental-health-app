@@ -7,6 +7,14 @@ export const useFormValidation = <TFormData>(schema: z.ZodType<TFormData, any, a
 
   const [validationErrors, setValidationErrors] = useState<ErrorObject>({});
 
+  const clearValidationError = useCallback((fieldName: string) => {
+    setValidationErrors((prevErrors) => {
+      const updatedErrors = { ...prevErrors };
+      delete updatedErrors[fieldName];
+      return updatedErrors;
+    });
+  }, []);
+
   const validate = useCallback((formData: TFormData) => {
     try {
       schema.parse(formData);
@@ -33,5 +41,5 @@ export const useFormValidation = <TFormData>(schema: z.ZodType<TFormData, any, a
         setValidationErrors({});
   }
 
-  return { validationErrors, validate, clearValidationErrors };
+  return { validationErrors, validate, clearValidationErrors, clearValidationError };
 }
