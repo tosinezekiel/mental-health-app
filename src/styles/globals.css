@@ -2,6 +2,34 @@
 @tailwind components;
 @tailwind utilities;
 
+.report {
+    @apply font-sans p-4;
+    max-width: 700px;
+  }
+  
+  .section-title {
+    @apply text-xl font-bold mb-2;
+  }
+  
+  .section-content {  /* Corrected class name */
+    @apply text-base;
+  }
+  
+  .list-item {
+    @apply list-none pl-4 mb-2;
+  }
+  
+  .disclaimer {
+    @apply text-sm italic mt-4;
+  }
+
+  .bullet-point::marker {
+    content: "•";
+    color: blue;
+    font-weight: bold;
+  }
+  
+
 .no-border input[type="password"], .no-border input[type="email"], .no-border input[type="text"], textarea {
     border: none !important;
     padding: 0 !important;
