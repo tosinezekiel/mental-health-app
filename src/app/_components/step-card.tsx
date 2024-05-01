@@ -1,27 +1,32 @@
 import React from 'react'
+import { Check } from '@styled-icons/bootstrap/Check';
+import styled from 'styled-components'
 
 interface CardDetail {
     title: string;
-    serialNumber: string;
+    serialNumber: number;
   }
   
   interface CardDetailtProps {
     cardDetail: CardDetail;
-    isSelected: boolean;
-    onItemClick: (cardDetail: CardDetail) => void;
+    currentStep: number;
   }
 
-const StepCard : React.FC<CardDetailtProps> = ({ cardDetail, isSelected, onItemClick }) => {
+  const WhiteCheck = styled(Check)`
+  color: white;
+`
+
+const StepCard : React.FC<CardDetailtProps> = ({ cardDetail, currentStep }) => {
+
   return (
-    <div onClick={() => onItemClick(cardDetail)}>
-        <div className={`rounded-lg p-2 flex ${isSelected? `bg-white` :`bg-gray-600`}`}>
-            <div className={`${isSelected? `text-black` :`text-white`} mb-2 Roboto flex justify-center items-center`}>
-                <span> { cardDetail.title }</span>
-            </div>
-            <div className={`${isSelected? `text-black` :`text-white`} p-2 mr-2 mb-2 text-4xl font-semibold italic font-serif`}> { cardDetail.serialNumber } </div>
-        </div>
+    <div className='flex flex-col h-full items-center'>
+      <div className={ `${cardDetail.serialNumber < currentStep ? `bg-green-500`: (cardDetail.serialNumber === currentStep) ? `bg-gray-500 text-white font-bold` : `border border-black`} h-10 w-10 rounded-full flex items-center justify-center`}>
+        { cardDetail.serialNumber < currentStep ? <WhiteCheck /> : cardDetail.serialNumber }
+      </div>
+      {(cardDetail.serialNumber === 5) ? `` : <div className={`${cardDetail.serialNumber < currentStep ? `bg-green-500`: `bg-black`} w-1 flex-1`}></div>}
     </div>
   )
 }
+
 
 export default StepCard

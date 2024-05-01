@@ -1,50 +1,50 @@
 "use client"
 
-import React, { useState } from 'react'
+import React from 'react'
 import StepCard from './step-card'
+import { useQuestionResponseContext } from '../context/question-context';
 
 interface CardDetail {
     title: string;
-    serialNumber: string;
-  }
+    serialNumber: number;
+}
 
 const SidePanel = () => {
 
     //Mock Data
-    const cardDetails : CardDetail[] = [{
+    const cardDetails: CardDetail[] = [{
         title: 'Basic Summary',
-        serialNumber: '1'
+        serialNumber: 1
     },
     {
         title: 'Key Metric',
-        serialNumber: '2',
+        serialNumber: 2,
     },
     {
         title: 'Additional Details',
-        serialNumber: '3',
+        serialNumber: 3,
     },
     {
         title: 'Upload Media',
-        serialNumber: '4',
+        serialNumber: 4,
+    },
+    {
+        title: 'Summary',
+        serialNumber: 5
     }];
 
-    const [selectedStep, setSelectedStep] = useState<CardDetail | null>(null);
-
-    const handleItemClick = (cardDetail: CardDetail) => {
-        setSelectedStep(cardDetail);
-      };
+    const { data } = useQuestionResponseContext();
 
 
     return (
-        <div className="bg-black p-4">
+        <div className="bg-white p-4 flex flex-col fixed inset-y-0 left-0 shadow-lg">
             {
                 cardDetails.map((cardDetail) => {
-                   return (
-                    <div className="mb-4 mx-2" key={cardDetail.serialNumber}>
-                   <StepCard cardDetail={cardDetail}
-                   isSelected={selectedStep?.serialNumber === cardDetail.serialNumber}
-                   onItemClick={handleItemClick}></StepCard>
-                   </div>)
+                    return (
+                        <div className="mx-2 flex-1" key={cardDetail.serialNumber}>
+                            <StepCard cardDetail={cardDetail}
+                                currentStep={data.currentStep}></StepCard>
+                        </div>)
                 })
             }
         </div>
