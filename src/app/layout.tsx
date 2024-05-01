@@ -6,7 +6,6 @@ import { Inter } from "next/font/google";
 import { NextUIProvider } from "@nextui-org/react";
 import Head from "next/head";
 import { SessionProvider } from "next-auth/react";
-import { usePathname } from "next/navigation";
 
 import { TRPCReactProvider } from "~/trpc/react";
 
@@ -26,7 +25,6 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const path: string = usePathname();
   return (
     <html lang="en">
       <body className={`font-sans ${inter.variable}`}>
@@ -38,11 +36,9 @@ export default function RootLayout({
                   <TRPCReactProvider>{children}</TRPCReactProvider>
                 </main>
 
-                {path == "/auth/patient/consultation" || (
-                  <footer className="fixed bottom-1 left-auto right-auto w-full px-6 py-4 text-center">
-                    Made with ❤️
-                  </footer>
-                )}
+                {/* <footer className="fixed bottom-1 left-auto right-auto w-full px-6 py-4 text-center">
+                  Made with ❤️
+                </footer> */}
               </NextUIProvider>
             </div>
           </main>
