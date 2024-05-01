@@ -5,6 +5,7 @@ import { Dialog, Menu, Transition } from "@headlessui/react";
 import { useSession } from "next-auth/react";
 import { signOut } from "next-auth/react";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
 
 import {
   Bars3Icon,
@@ -70,13 +71,13 @@ export default function DashboardLayout({
     },
     {
       name: "Users",
-      href: "/auth/admin/patients",
+      href: "/auth/admin/users",
       icon: ChartPieIcon,
-      current: path === "/auth/admin/patients",
+      current: path === "/auth/admin/users",
     },
     {
       name: "Practices",
-      href: "/auth/admin/practices",
+      href: "#",
       icon: ChartPieIcon,
       current: path === "/auth/admin/practices",
     },
@@ -158,8 +159,7 @@ export default function DashboardLayout({
                             <ul role="list" className="-mx-2 space-y-1">
                               {userMenu.map((item) => (
                                 <li key={item.name}>
-                                  <a
-                                    href={item.href}
+                                  <Link href={item.href}
                                     className={classNames(
                                       item.current
                                         ? "bg-gray-50 text-blue-600"
@@ -177,7 +177,7 @@ export default function DashboardLayout({
                                       aria-hidden="true"
                                     />
                                     {item.name}
-                                  </a>
+                                  </Link>
                                 </li>
                               ))}
                             </ul>
@@ -209,8 +209,7 @@ export default function DashboardLayout({
                             <ul role="list" className="-mx-2 space-y-1">
                               {adminMenu.map((item) => (
                                 <li key={item.name}>
-                                  <a
-                                    href={item.href}
+                                  <Link href={item.href}
                                     className={classNames(
                                       item.current
                                         ? "bg-gray-50 text-blue-600"
@@ -223,7 +222,7 @@ export default function DashboardLayout({
                                       aria-hidden="true"
                                     />
                                     {item.name}
-                                  </a>
+                                  </Link>
                                 </li>
                               ))}
                             </ul>
@@ -271,8 +270,7 @@ export default function DashboardLayout({
                     <ul role="list" className="-mx-2 space-y-1">
                       {userMenu.map((item) => (
                         <li key={item.name}>
-                          <a
-                            href={item.href}
+                          <Link href={item.href}
                             className={classNames(
                               item.current
                                 ? "bg-gray-50 text-blue-600"
@@ -290,7 +288,7 @@ export default function DashboardLayout({
                               aria-hidden="true"
                             />
                             {item.name}
-                          </a>
+                          </Link>
                         </li>
                       ))}
                     </ul>
@@ -319,8 +317,7 @@ export default function DashboardLayout({
                     <ul role="list" className="-mx-2 space-y-1">
                       {adminMenu.map((item) => (
                         <li key={item.name}>
-                          <a
-                            href={item.href}
+                          <Link href={item.href}
                             className={classNames(
                               item.current
                                 ? "bg-gray-800 text-white"
@@ -333,7 +330,7 @@ export default function DashboardLayout({
                               aria-hidden="true"
                             />
                             {item.name}
-                          </a>
+                          </Link>
                         </li>
                       ))}
                     </ul>

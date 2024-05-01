@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { signIn, useSession } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react";
 import Link from "next/link";
 import { Input, Button } from "@nextui-org/react";
 import { registerFormSchema } from "../schemas/formSchema";
@@ -16,7 +16,7 @@ const Form = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const router = useRouter();
-  const { data: session } = useSession();
+  
   const userCreator = api.user.create.useMutation()
 
   const { formData, handleChange } = useForm<IRegisterFormValues>({
@@ -57,6 +57,7 @@ const Form = () => {
             throw new Error(authenticate.error);
           }
 
+          const session = await getSession();
           session?.user.role == "ADMIN"
             ? router.push("/auth/admin")
             : router.push("/auth/patient");

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { signIn, useSession } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react";
 import { Input, Button } from "@nextui-org/react";
 import { loginFormSchema } from "../schemas/formSchema";
 import { ILoginFormValues } from "~/types/formTypes";
@@ -14,7 +14,6 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState("");
   const router = useRouter();
-  const { data: session } = useSession();
 
   const { validationErrors, validate, clearValidationErrors, clearValidationError } =
     useFormValidation<ILoginFormValues>(loginFormSchema);
@@ -48,6 +47,8 @@ const Login = () => {
       if (result?.error) {
         throw new Error(result.error);
       }
+
+      const session  = await getSession();
 
       session?.user.role == "ADMIN" ? router.push('/auth/admin') : router.push('/auth/patient');
       

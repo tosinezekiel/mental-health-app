@@ -6,6 +6,7 @@ import bcrypt from 'bcryptjs';
 import {
   createTRPCRouter,
   publicProcedure,
+  protectedProcedure,
 } from "~/server/api/trpc";
 
 export const userRouter = createTRPCRouter({
@@ -27,4 +28,23 @@ export const userRouter = createTRPCRouter({
     
     return user;
   }),
+
+  getUsers: protectedProcedure
+  .query(async () => {
+    const users = await db.user.findMany({
+      where: {
+        role: 'USER'
+      },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        role: true,
+        createdAt: true,
+      }
+    })
+
+    return users;
+  })
 });
