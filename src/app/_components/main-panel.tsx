@@ -2,14 +2,9 @@ import React, { useState } from 'react'
 import { Spinner } from "@nextui-org/react";
 import QuestionContainer from './question-container';
 import { useQuestionResponseContext } from '../context/question-context';
+import { getQuestion } from '~/server/gemini/getQuestion';
+import { Question } from '../models/Question';
 
-
-interface Question {
-  questionId: string;
-  question: string;
-  answerType: string;
-  options: string[];
-}
 
 //Mock list
 
@@ -61,12 +56,20 @@ const MainPanel = () => {
   // the users for current step
   const { data } = useQuestionResponseContext();
 
-  //TODO: Add an function for API call to send the 'data' and generate next set of question and set it to 'questionaire'
-
+  // let questionList
   const generateNewQuestions = () => {
     setLoading(true);
-    //TODO: Call the above API function
+    getQuestion(data).then((response: Question[]|undefined) => {
+      if(undefined == response) {
+        return;
+      }
+      console.log("response: " + response);
+      updateQuestionaire(response);
+    }).finally( () => {
+      setLoading(false);
+    });
 
+    
     // Below is the mock response from API
     const nextSetQuestions: Question[] = [
       {
@@ -104,11 +107,6 @@ const MainPanel = () => {
         options: []
       }
     ];
-
-    updateQuestionaire(nextSetQuestions);
-    setTimeout(() => {
-      setLoading(false);
-    }, 2000);
   }
 
   return (
