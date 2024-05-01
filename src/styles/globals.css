@@ -2,12 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
-.no-border input[type="password"], .no-border input[type="email"], .no-border input[type="text"] {
+.no-border input[type="password"], .no-border input[type="email"], .no-border input[type="text"], textarea {
     border: none !important;
     padding: 0 !important;
 }
 
-.no-border input[type="password"]:focus, .no-border input[type="email"]:focus, .no-border input[type="text"]:focus {
+.no-border input[type="password"]:focus, .no-border input[type="email"]:focus, .no-border input[type="text"]:focus, textarea:focus {
     outline: none;
     box-shadow: none;
 }

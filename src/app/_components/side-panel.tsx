@@ -37,7 +37,7 @@ const SidePanel = () => {
 
 
     return (
-        <div className="bg-white p-4 flex flex-col fixed inset-y-0 left-0 shadow-lg">
+        <div className="bg-white p-4 flex flex-col">
             {
                 cardDetails.map((cardDetail) => {
                     return (
