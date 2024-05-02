@@ -2,8 +2,10 @@ import React, { useState } from 'react'
 import { Spinner } from "@nextui-org/react";
 import QuestionContainer from './question-container';
 import { useQuestionResponseContext } from '../context/question-context';
-import { getQuestion } from '~/server/gemini/getQuestion';
+import { getQuestion, getReport } from '~/server/gemini/getQuestion';
 import { Question } from '../models/Question';
+import { useReportDataContext } from '../context/report-content';
+import { useRouter } from 'next/navigation';
 
 
 //Mock list
@@ -50,71 +52,63 @@ const defaultQuestions: Question[] = [
 
 const MainPanel = () => {
 
+  const router = useRouter()
+
   const [questionaire, updateQuestionaire] = useState(defaultQuestions)
   const [isLoading, setLoading] = useState(false);
   // This data will have the responses from 
   // the users for current step
   const { data } = useQuestionResponseContext();
+  const { reportData, updateReportData } = useReportDataContext();
 
   // let questionList
   const generateNewQuestions = () => {
     setLoading(true);
+
     getQuestion(data).then((response: Question[]|undefined) => {
-      if(undefined == response) {
+      if( response == undefined) {
         return;
       }
       console.log("response: " + response);
       updateQuestionaire(response);
-    }).finally( () => {
-      setLoading(false);
-    });
+    }).catch((err)=> {
+      console.error(err);
+  }).finally( () => {
+      setLoading(false)
+    }
+    )
+  };
 
-    
-    // Below is the mock response from API
-    const nextSetQuestions: Question[] = [
-      {
-        questionId: 'Q105',
-        question: 'Do you sleep well?',
-        answerType: 'SingleSelect',
-        options: [
-          "Yes",
-          "No"
-        ]
-      },
-      {
-        questionId: 'Q106',
-        question: 'What are your favorite colors?',
-        answerType: 'MultiSelect',
-        options: [
-          'Red',
-          'Blue',
-          'Green',
-          'Yellow',
-          'Orange',
-          'Purple'
-        ]
-      },
-      {
-        questionId: 'Q107',
-        question: 'What is your age?',
-        answerType: 'SingleLineInput',
-        options: []
-      },
-      {
-        questionId: 'Q108',
-        question: 'Describe your day in a few sentences.',
-        answerType: 'MultiLineInput',
-        options: []
+  const generateReport = () => {
+    setLoading(true);
+
+    getReport(data).then((response) => {
+      if( response == undefined) {
+        return;
       }
-    ];
-  }
+      router.push({
+        pathname: '/auth/patient/report',
+        query: {
+          data: JSON.stringify(response)
+        }
+      });
+      console.log("response: " + response);
+      // updateReportData(response);
+      // window.location.href = '/auth/patient/report';
+    }).catch((err)=> {
+        console.error(err);
+    }).finally( () => {
+      setLoading(false)
+    }
+    )
+  };
 
   return (
     <div className={`flex-1 ${isLoading ? `flex justify-center` : ``}`}>
       {
         isLoading ?
           <Spinner color="primary" size="lg" label='Loading...' /> :
-          <QuestionContainer questionaire={questionaire} nextButtonHandler={generateNewQuestions}></QuestionContainer>
+          <QuestionContainer questionaire={questionaire} nextButtonHandler={data.currentStep <= 1 ? generateNewQuestions : generateReport}></QuestionContainer>
       }
     </div>
   )

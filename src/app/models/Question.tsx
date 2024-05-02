@@ -5,3 +5,8 @@ export interface Question {
     options: string[];
     categoryType?: string;
 }
+
+export interface Response {
+    questionId: string,
+    answers: string | string[],
+}

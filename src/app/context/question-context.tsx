@@ -1,17 +1,18 @@
 import React, { createContext, useContext, useState } from 'react';
+import type { Question, Response } from '../models/Question';
 
 
-type Question = {
-    questionId: string;
-    question: string;
-    answerType: string;
-    options: string[];
-}
+// type Question = {
+//     questionId: string;
+//     question: string;
+//     answerType: string;
+//     options: string[];
+// }
 
-type Response = {
-    questionId: string,
-    answers: string | string[],
-}
+// type Response = {
+//     questionId: string,
+//     answers: string | string[],
+// }
 
 const defaultContext = {
     currentStep: 1,
