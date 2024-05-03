@@ -6,5 +6,5 @@
     "prompt": "tell a joke",
     "giveResults": "Provide me with detailed analysis.",
     "newQuestionSet": "Generate next set of questions in same format based on the response array.\n NOTE: Do not send anything other than the JSON and inside JSON all the question should be in an array with key `questions`. Remember to ask 5 to 10 questions",
-    "generateReport": "Now based on the responses to all the asked questions generate the a detail report. Generate in the JSON format with keys 'Potential problem', 'Positive aspect', 'Things to work on', 'Recommendations', 'Additional comments', 'Potential conditions to consider'. Do not give an array of disorder for every problem. Provide disorder considering all the problems together"
+    "generateReport": "Now based on the responses to all the asked questions generate the a detail report. Generate in the JSON format with keys 'PotentialProblem', 'PositiveAspect', 'ThingsToWorkOn', 'Recommendations', 'AdditionalComments', 'PotentialDisorderToConsider' and values for the keys should be in the form of array. Provide disorder considering all the problems together"
 }

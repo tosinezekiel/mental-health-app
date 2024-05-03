@@ -5,7 +5,7 @@ import { useQuestionResponseContext } from '../context/question-context';
 import { getQuestion, getReport } from '~/server/gemini/getQuestion';
 import { Question } from '../models/Question';
 import { useReportDataContext } from '../context/report-content';
-import { useRouter } from 'next/navigation';
+import ReportPage from '../auth/patient/report/page';
 
 
 //Mock list
@@ -52,14 +52,13 @@ const defaultQuestions: Question[] = [
 
 const MainPanel = () => {
 
-  const router = useRouter()
-
   const [questionaire, updateQuestionaire] = useState(defaultQuestions)
   const [isLoading, setLoading] = useState(false);
   // This data will have the responses from 
   // the users for current step
   const { data } = useQuestionResponseContext();
-  const { reportData, updateReportData } = useReportDataContext();
+  // const { reportData, updateReportData } = useReportDataContext();
+  const [result, updateResult] = useState(null);
 
   // let questionList
   const generateNewQuestions = () => {
@@ -86,13 +85,8 @@ const MainPanel = () => {
       if( response == undefined) {
         return;
       }
-      router.push({
-        pathname: '/auth/patient/report',
-        query: {
-          data: JSON.stringify(response)
-        }
-      });
       console.log("response: " + response);
+      updateResult(response);
       // updateReportData(response);
       // window.location.href = '/auth/patient/report';
     }).catch((err)=> {
@@ -107,8 +101,9 @@ const MainPanel = () => {
     <div className={`flex-1 ${isLoading ? `flex justify-center` : ``}`}>
       {
         isLoading ?
-          <Spinner color="primary" size="lg" label='Loading...' /> :
-          <QuestionContainer questionaire={questionaire} nextButtonHandler={data.currentStep <= 1 ? generateNewQuestions : generateReport}></QuestionContainer>
+          <Spinner color="primary" size="lg" label='Loading...' /> : 
+            result === null ? <QuestionContainer questionaire={questionaire} nextButtonHandler={data.currentStep <= 1 ? generateNewQuestions : generateReport}></QuestionContainer>
+            : <ReportPage data={result}></ReportPage>
       }
     </div>
   )
