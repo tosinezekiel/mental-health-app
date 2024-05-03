@@ -23,19 +23,6 @@ const defaultQuestions: Question[] = [
     ]
   },
   {
-    questionId: 'Q102',
-    question: 'What are your favorite colors?',
-    answerType: 'MultiSelect',
-    options: [
-      'Red',
-      'Blue',
-      'Green',
-      'Yellow',
-      'Orange',
-      'Purple'
-    ]
-  },
-  {
     questionId: 'Q103',
     question: 'What is your age?',
     answerType: 'SingleLineInput',
@@ -102,7 +89,7 @@ const MainPanel = () => {
       {
         isLoading ?
           <Spinner color="primary" size="lg" label='Loading...' /> : 
-            result === null ? <QuestionContainer questionaire={questionaire} nextButtonHandler={data.currentStep <= 1 ? generateNewQuestions : generateReport}></QuestionContainer>
+            result === null ? <QuestionContainer questionaire={questionaire} nextButtonHandler={data.currentStep < 5 ? generateNewQuestions : generateReport}></QuestionContainer>
             : <ReportPage data={result}></ReportPage>
       }
     </div>
